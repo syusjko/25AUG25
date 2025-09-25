@@ -1,0 +1,58 @@
+# .github/workflows/build-lambda-dependencies.yml
+name: Build Lambda Dependencies
+
+on:
+  workflow_call:
+    inputs:
+      service_path:
+        required: true
+        type: string
+      lambda_function_name:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  build-dependencies:
+    name: Build Lambda Dependencies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.service_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          if [ -f src/requirements.txt ]; then
+            pip install -r src/requirements.txt -t src/
+          fi
+
+      - name: Create deployment package
+        run: |
+          cd src
+          zip -r ../dist/${{ inputs.lambda_function_name }}.zip .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ inputs.lambda_function_name }} \
+            --zip-file fileb://dist/${{ inputs.lambda_function_name }}.zip

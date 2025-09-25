@@ -1,16 +1,19 @@
 import json
 import os
 import math
+import google.generativeai as genai
 # import psycopg2
-# import google.generativeai as genai
 
-# genai.configure(api_key="YOUR_GEMINI_API_KEY")
+# Gemini API 키 설정
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # --- DB 연결 정보 ---
-# DB_HOST = os.environ.get('DB_HOST')
-# DB_NAME = os.environ.get('DB_NAME')
-# DB_USER = os.environ.get('DB_USER')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 def cosine_similarity(vec_a, vec_b):
     """
@@ -32,15 +35,19 @@ def get_text_embedding(text):
     """
     Gemini Embedding API를 호출하여 텍스트를 벡터로 변환합니다.
     """
-    # result = genai.embed_content(
-    #     model="models/embedding-001",
-    #     content=text,
-    #     task_type="RETRIEVAL_QUERY" # 사용자 질문이므로 'RETRIEVAL_QUERY' 사용
-    # )
-    # return result['embedding']
-    
-    # --- 임시 모의(Mock) 벡터 ---
-    return [0.1] * 768
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY is not configured for ad generator.")
+
+    try:
+        result = genai.embed_content(
+            model="models/text-embedding-004",
+            content=text,
+            task_type="RETRIEVAL_QUERY" # 사용자 질문이므로 'RETRIEVAL_QUERY' 사용
+        )
+        return result['embedding']
+    except Exception as e:
+        print(f"Error calling Gemini Embedding API: {e}")
+        return None
 
 def find_best_matching_advertiser(user_query_vector):
     """
@@ -88,27 +95,30 @@ def generate_personalized_ad(advertiser, user_query):
     """
     Gemini API를 사용하여 사용자 질문에 맞춤화된 광고를 생성합니다.
     """
-    # --- 실제 Gemini API 호출 예시 ---
-    # model = genai.GenerativeModel('gemini-pro')
-    # prompt = f"""
-    # 다음 정보를 바탕으로 사용자 질문에 맞는 맞춤형 광고를 생성해주세요:
-    # 
-    # 광고주: {advertiser['name']}
-    # 광고주 설명: {advertiser['description']}
-    # 사용자 질문: {user_query}
-    # 기본 템플릿: {advertiser['ad_template']}
-    # 
-    # 요구사항:
-    # - 사용자의 질문 맥락을 반영
-    # - 자연스럽고 매력적인 문구
-    # - 한국어로 작성
-    # - 50자 이내로 간결하게
-    # """
-    # response = model.generate_content(prompt)
-    # return response.text.strip()
+    if not GEMINI_API_KEY:
+        return f"{advertiser['name']}의 솔루션이 궁금하시군요! {advertiser['ad_template']}"
     
-    # --- 임시 Mock 응답 ---
-    return f"{advertiser['name']}의 솔루션이 궁금하시군요! {advertiser['ad_template']}"
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        prompt = f"""
+        다음 정보를 바탕으로 사용자 질문에 맞는 맞춤형 광고를 생성해주세요:
+        
+        광고주: {advertiser['name']}
+        광고주 설명: {advertiser['description']}
+        사용자 질문: {user_query}
+        기본 템플릿: {advertiser['ad_template']}
+        
+        요구사항:
+        - 사용자의 질문 맥락을 반영
+        - 자연스럽고 매력적인 문구
+        - 한국어로 작성
+        - 50자 이내로 간결하게
+        """
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error calling Gemini API for ad generation: {e}")
+        return f"{advertiser['name']}의 솔루션이 궁금하시군요! {advertiser['ad_template']}"
 
 def handler(event, context):
     """
@@ -141,6 +151,13 @@ def handler(event, context):
         
         # 1. 사용자 질문을 벡터로 변환
         user_query_vector = get_text_embedding(user_query)
+        
+        if user_query_vector is None:
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Failed to generate query embedding'})
+            }
         
         # 2. 가장 유사한 광고주 찾기
         best_advertiser, similarity_score = find_best_matching_advertiser(user_query_vector)

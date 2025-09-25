@@ -104,6 +104,34 @@ resource "aws_iam_role_policy_attachment" "ad_engine_policy_attachment" {
   policy_arn = aws_iam_policy.ad_engine_lambda_policy.arn
 }
 
+# --- Lambda Function for Vectorization ---
+data "archive_file" "vectorizer_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/src"
+  output_path = "${path.module}/dist/vectorizer.zip"
+}
+
+resource "aws_lambda_function" "vectorizer_lambda" {
+  function_name    = "ad-scouter-vectorizer"
+  handler          = "vectorizer.handler"
+  runtime          = "python3.11"
+  role             = aws_iam_role.ad_engine_lambda_role.arn
+  
+  filename         = data.archive_file.vectorizer_zip.output_path
+  source_code_hash = data.archive_file.vectorizer_zip.output_base64sha256
+  timeout          = 300 # 5분
+  
+  environment {
+    variables = {
+      DB_HOST       = aws_db_instance.ad_db.address
+      DB_NAME       = aws_db_instance.ad_db.db_name
+      DB_USER       = aws_db_instance.ad_db.username
+      DB_PASSWORD   = var.db_password
+      GEMINI_API_KEY = var.gemini_api_key
+    }
+  }
+}
+
 # --- Lambda Function for Ad Generation ---
 data "archive_file" "ad_generator_zip" {
   type        = "zip"
@@ -123,11 +151,11 @@ resource "aws_lambda_function" "ad_generator_lambda" {
   
   environment {
     variables = {
-      DB_HOST     = aws_db_instance.ad_db.address
-      DB_NAME     = aws_db_instance.ad_db.db_name
-      DB_USER     = aws_db_instance.ad_db.username
-      DB_PASSWORD = var.db_password
-      # GEMINI_API_KEY = var.gemini_api_key
+      DB_HOST       = aws_db_instance.ad_db.address
+      DB_NAME       = aws_db_instance.ad_db.db_name
+      DB_USER       = aws_db_instance.ad_db.username
+      DB_PASSWORD   = var.db_password
+      GEMINI_API_KEY = var.gemini_api_key
     }
   }
 }

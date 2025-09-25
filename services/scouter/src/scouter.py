@@ -1,7 +1,11 @@
 import json
+import os
+import google.generativeai as genai
 
-# import google.generativeai as genai
-# genai.configure(api_key="YOUR_GEMINI_API_KEY")
+# Gemini API 키 설정
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 def handler(event, context):
     """
@@ -66,29 +70,22 @@ def handler(event, context):
 
 def extract_advertiser_from_question(question):
     """
-    (임시 Mock 함수) Gemini API를 사용하여 질문에서 잠재 광고주 이름(회사/제품)을 추출합니다.
+    Gemini API를 사용하여 질문에서 잠재 광고주 이름(회사/제품)을 추출합니다.
     """
-    # --- 실제 Gemini API 호출 예시 ---
-    # model = genai.GenerativeModel('gemini-pro')
-    # response = model.generate_content(f"다음 문장에서 언급된 회사 또는 제품 이름을 하나만 정확히 추출해줘: '{question}'")
-    # return response.text.strip()
-
-    # 간단한 키워드 기반으로 임시 구현
-    question_lower = question.lower()
-    
-    if "마이크로소프트" in question_lower or "microsoft" in question_lower or "ms" in question_lower:
-        return "Microsoft"
-    if "구글" in question_lower or "google" in question_lower:
-        return "Google"
-    if "애플" in question_lower or "apple" in question_lower:
-        return "Apple"
-    if "아마존" in question_lower or "amazon" in question_lower:
-        return "Amazon"
-    if "삼성" in question_lower or "samsung" in question_lower:
-        return "Samsung"
-    if "네이버" in question_lower or "naver" in question_lower:
-        return "Naver"
-    if "카카오" in question_lower or "kakao" in question_lower:
-        return "Kakao"
-    
-    return None
+    if not GEMINI_API_KEY:
+        print("GEMINI_API_KEY is not configured. Skipping advertiser extraction.")
+        return None
+        
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        prompt = f"""
+        다음 문장에서 언급된 가장 핵심적인 회사 또는 제품 이름을 하나만 정확히 추출해줘. 다른 설명 없이 이름만 말해줘. 만약 없다면 '없음'이라고 답해줘.
+        문장: "{question}"
+        회사/제품 이름:
+        """
+        response = model.generate_content(prompt)
+        result = response.text.strip()
+        return result if result != "없음" else None
+    except Exception as e:
+        print(f"Error calling Gemini API for extraction: {e}")
+        return None

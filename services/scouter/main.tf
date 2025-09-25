@@ -78,7 +78,7 @@ resource "aws_lambda_function" "scouter_lambda" {
   
   environment {
     variables = {
-      # GEMINI_API_KEY = var.gemini_api_key
+      GEMINI_API_KEY = var.gemini_api_key
     }
   }
 }

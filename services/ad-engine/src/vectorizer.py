@@ -1,30 +1,37 @@
 import json
 import os
+import google.generativeai as genai
 # import psycopg2 # PostgreSQL 어댑터
-# import google.generativeai as genai
 
-# genai.configure(api_key="YOUR_GEMINI_API_KEY")
+# Gemini API 키 설정
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # --- DB 연결 정보 (환경 변수로 관리) ---
-# DB_HOST = os.environ.get('DB_HOST')
-# DB_NAME = os.environ.get('DB_NAME')
-# DB_USER = os.environ.get('DB_USER')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 def get_text_embedding(text):
     """
     Gemini Embedding API를 호출하여 텍스트를 벡터로 변환합니다.
     """
-    # result = genai.embed_content(
-    #     model="models/embedding-001",
-    #     content=text,
-    #     task_type="RETRIEVAL_DOCUMENT" # DB에 저장될 문서이므로 'RETRIEVAL_DOCUMENT' 사용
-    # )
-    # return result['embedding']
-    
-    # --- 임시 모의(Mock) 벡터 ---
-    # 실제 API 연동 전 테스트를 위한 코드입니다. 768차원 벡터를 가정합니다.
-    return [0.1] * 768
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY is not configured for vectorizer.")
+
+    try:
+        # 최신 임베딩 모델 사용
+        result = genai.embed_content(
+            model="models/text-embedding-004", # 또는 최신 모델
+            content=text,
+            task_type="RETRIEVAL_DOCUMENT"
+        )
+        return result['embedding']
+    except Exception as e:
+        print(f"Error calling Gemini Embedding API: {e}")
+        return None
 
 def handler(event, context):
     """
@@ -48,6 +55,12 @@ def handler(event, context):
     try:
         # 1. 광고주 정보 텍스트를 벡터로 변환
         embedding_vector = get_text_embedding(description)
+        
+        if embedding_vector is None:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'error': 'Failed to generate embedding'})
+            }
         
         # 2. DB에 연결하여 해당 광고주의 'embedding' 컬럼을 업데이트
         # conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)

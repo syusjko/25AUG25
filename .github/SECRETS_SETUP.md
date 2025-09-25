@@ -12,6 +12,7 @@
 - `DATA_PROCESSOR_TF_VARS`: 데이터 프로세서 서비스용 Terraform 변수
 - `SCOUTER_TF_VARS`: 스카우터 서비스용 Terraform 변수
 - `AD_ENGINE_TF_VARS`: 광고 엔진 서비스용 Terraform 변수
+- `GEMINI_API_KEY`: Google Gemini API 키 (모든 서비스에서 공통 사용)
 
 ### 배포 관련
 - `CLOUDFRONT_DISTRIBUTION_ID`: CloudFront 배포 ID (SDK CDN용)
@@ -72,18 +73,26 @@ aws iam create-access-key --user-name ad-scouter-ci-cd
 ```hcl
 aws_region = "ap-northeast-2"
 kinesis_stream_arn = "arn:aws:kinesis:ap-northeast-2:123456789012:stream/ad-scouter-ingest-stream"
+gemini_api_key = "your-gemini-api-key-here"
 ```
 
 **SCOUTER_TF_VARS:**
 ```hcl
 aws_region = "ap-northeast-2"
 dynamodb_stream_arn = "arn:aws:dynamodb:ap-northeast-2:123456789012:table/ad-scouter-stats/stream/2024-01-01T00:00:00.000"
+gemini_api_key = "your-gemini-api-key-here"
 ```
 
 **AD_ENGINE_TF_VARS:**
 ```hcl
 aws_region = "ap-northeast-2"
 db_password = "your-secure-database-password"
+gemini_api_key = "your-gemini-api-key-here"
+```
+
+**GEMINI_API_KEY:**
+```
+your-gemini-api-key-here
 ```
 
 ### 4. 선택적 Secrets

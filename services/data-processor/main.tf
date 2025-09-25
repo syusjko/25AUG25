@@ -115,8 +115,8 @@ resource "aws_lambda_function" "processor_lambda" {
 
   environment {
     variables = {
-      STATS_TABLE_NAME   = aws_dynamodb_table.stats_table.name
-      # GEMINI_API_KEY = var.gemini_api_key # 추후 Gemini API 키를 여기에 추가
+      STATS_TABLE_NAME = aws_dynamodb_table.stats_table.name
+      GEMINI_API_KEY   = var.gemini_api_key
     }
   }
 }

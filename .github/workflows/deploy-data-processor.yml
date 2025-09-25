@@ -10,8 +10,19 @@ on:
   workflow_dispatch: # 수동 실행 기능
 
 jobs:
+  build-dependencies:
+    name: Build Lambda Dependencies
+    uses: ./.github/workflows/build-lambda-dependencies.yml
+    with:
+      service_path: 'services/data-processor'
+      lambda_function_name: 'ad-scouter-data-processor'
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
   deploy:
     name: Deploy to AWS
+    needs: build-dependencies
     uses: ./.github/workflows/reusable-terraform-deploy.yml
     with:
       service_path: 'services/data-processor'
