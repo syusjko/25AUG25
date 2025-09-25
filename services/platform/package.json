@@ -1,0 +1,47 @@
+{
+  "name": "@ad-scouter/platform",
+  "version": "0.1.0",
+  "description": "Ad-Scouter AI Customer Platform and Dashboard",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "deploy": "terraform apply -auto-approve",
+    "destroy": "terraform destroy -auto-approve",
+    "plan": "terraform plan",
+    "init": "terraform init",
+    "validate": "terraform validate",
+    "format": "terraform fmt -recursive"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.5.4"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "@eslint/eslintrc": "^3",
+    "terraform": "^1.5.0"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "aws",
+    "cognito",
+    "dashboard",
+    "ad-scouter"
+  ],
+  "author": "Ad-Scouter AI Team",
+  "license": "MIT"
+}
