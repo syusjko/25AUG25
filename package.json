@@ -1,0 +1,38 @@
+{
+  "name": "ad-scouter-ai",
+  "version": "0.1.0",
+  "description": "Ad-Scouter AI Analytics Platform",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:sdk": "npm run build --workspace=@ad-scouter/sdk",
+    "dev": "docker-compose up --build",
+    "dev:sdk": "npm run dev --workspace=@ad-scouter/sdk",
+    "clean": "npm run clean --workspaces",
+    "install:all": "npm install && npm install --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ad-scouter/ad-scouter-ai.git"
+  },
+  "keywords": [
+    "analytics",
+    "ai",
+    "ad-scouter",
+    "tracking",
+    "sdk"
+  ],
+  "author": "Ad-Scouter AI Team",
+  "license": "MIT"
+}
