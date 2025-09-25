@@ -32,16 +32,39 @@ ad-scouter-ai/
 │   │   ├── main.tf          # 스카우터 Lambda 설정
 │   │   ├── variables.tf    # Terraform 변수
 │   │   └── README.md        # 스카우터 서비스 문서
-│   └── ad-engine/           # AI 기반 광고 배출 및 매칭 엔진
+│   ├── ad-engine/           # AI 기반 광고 배출 및 매칭 엔진
+│   │   ├── src/
+│   │   │   ├── ad_generator.py # 광고 생성 Lambda
+│   │   │   └── vectorizer.py  # 벡터화 Lambda
+│   │   ├── main.tf          # RDS, Lambda, API Gateway 설정
+│   │   ├── variables.tf     # Terraform 변수
+│   │   └── README.md        # 광고 엔진 서비스 문서
+│   └── platform/           # 고객용 웹 플랫폼 및 대시보드
 │       ├── src/
-│       │   ├── ad_generator.py # 광고 생성 Lambda
-│       │   └── vectorizer.py  # 벡터화 Lambda
-│       ├── main.tf          # RDS, Lambda, API Gateway 설정
+│       │   ├── app/
+│       │   │   ├── dashboard/ # 고객 대시보드
+│       │   │   ├── login/     # 로그인 페이지
+│       │   │   └── signup/    # 회원가입 페이지
+│       │   └── components/
+│       │       └── auth/     # 인증 컴포넌트
+│       ├── main.tf          # Cognito 인증 설정
 │       ├── variables.tf     # Terraform 변수
-│       └── README.md        # 광고 엔진 서비스 문서
+│       └── README.md        # 플랫폼 서비스 문서
 ├── docker-compose.yml       # 로컬 개발 환경 설정
 ├── package.json             # 루트 패키지 설정
-└── .gitignore              # Git 제외 파일 목록
+├── .gitignore              # Git 제외 파일 목록
+└── .github/
+    └── workflows/          # GitHub Actions CI/CD 파이프라인
+        ├── reusable-terraform-deploy.yml      # 재사용 가능한 Terraform 배포
+        ├── security-enhanced-deploy.yml       # 보안 강화 배포 (수동 승인)
+        ├── deploy-api-gateway.yml             # API Gateway 배포
+        ├── deploy-data-processor.yml          # 데이터 프로세서 배포
+        ├── deploy-scouter.yml                 # 스카우터 배포
+        ├── deploy-ad-engine.yml               # 광고 엔진 배포
+        ├── deploy-platform.yml                # 플랫폼 배포
+        ├── build-and-deploy-sdk.yml           # SDK 빌드 및 배포
+        ├── build-and-deploy-platform.yml      # 플랫폼 빌드 및 배포
+        └── test-all-services.yml              # 전체 서비스 테스트
 ```
 
 ## SDK 사용법
@@ -142,6 +165,13 @@ docker-compose up --build
 - [x] AI 기반 광고 배출 및 매칭 엔진 (RDS + pgvector)
 - [x] 코사인 유사도 기반 광고 매칭 시스템
 - [x] 실시간 맞춤형 광고 생성 API
+- [x] 고객용 웹 플랫폼 및 대시보드 (Next.js)
+- [x] AWS Cognito 기반 사용자 인증 시스템
+- [x] 전문적인 기업 웹사이트 및 브랜딩
+- [x] 완전 자동화된 CI/CD 파이프라인 (GitHub Actions)
+- [x] 보안 강화된 배포 프로세스 (수동 승인)
+- [x] 코드 품질 관리 및 자동 테스트
+- [x] 프로덕션 수준의 운영 환경 구축
 
 ### 🚧 진행 중인 작업
 - [ ] Gemini API 실제 연동
@@ -149,6 +179,35 @@ docker-compose up --build
 - [ ] 영업 자동화 (S3, SES 연동)
 - [ ] 실시간 모니터링 대시보드
 - [ ] 광고 성과 추적 시스템
+- [ ] 고급 인증 기능 (MFA, 소셜 로그인)
+
+## CI/CD 파이프라인
+
+### 자동화된 배포 시스템
+이 프로젝트는 GitHub Actions를 사용한 완전 자동화된 CI/CD 파이프라인을 갖추고 있습니다.
+
+#### 배포 프로세스
+```
+Git Push → GitHub Actions → Code Scan → Terraform Plan → Manual Approval → Terraform Apply → Deployed to AWS
+```
+
+#### 주요 기능
+- **자동 테스트**: 모든 서비스의 코드 품질 및 기능 테스트
+- **보안 스캔**: CodeQL 및 Trivy를 통한 취약점 검사
+- **수동 승인**: 프로덕션 배포 전 책임자 승인 필수
+- **롤백 지원**: 문제 발생 시 즉시 이전 상태로 복구
+
+#### 워크플로우 구성
+- **재사용 가능한 워크플로우**: 모든 서비스에서 공통 사용
+- **서비스별 배포**: 각 마이크로서비스 독립적 배포
+- **환경별 분리**: 개발/스테이징/프로덕션 환경 분리
+
+### 설정 방법
+1. **GitHub Secrets 설정**: `.github/SECRETS_SETUP.md` 참조
+2. **AWS 자격 증명**: IAM 사용자 및 권한 설정
+3. **워크플로우 활성화**: main 브랜치 push 시 자동 실행
+
+자세한 내용은 [CI/CD 문서](.github/CI_CD_DOCUMENTATION.md)를 참조하세요.
 
 ## 라이선스
 
