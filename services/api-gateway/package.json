@@ -1,0 +1,26 @@
+{
+  "name": "@ad-scouter/api-gateway",
+  "version": "0.1.0",
+  "description": "Ad-Scouter AI API Gateway service",
+  "main": "src/ingest.py",
+  "scripts": {
+    "deploy": "terraform apply -auto-approve",
+    "destroy": "terraform destroy -auto-approve",
+    "plan": "terraform plan",
+    "init": "terraform init",
+    "validate": "terraform validate",
+    "format": "terraform fmt -recursive"
+  },
+  "devDependencies": {
+    "terraform": "^1.5.0"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "api-gateway",
+    "terraform",
+    "ad-scouter"
+  ],
+  "author": "Ad-Scouter AI Team",
+  "license": "MIT"
+}

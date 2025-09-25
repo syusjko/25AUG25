@@ -9,7 +9,7 @@
         return;
     }
 
-    const AD_SCOUTER_API_ENDPOINT = 'https://api.your-domain.com/ingest'; // 최종 데이터 수집 API 엔드포인트
+    const AD_SCOUTER_API_ENDPOINT = 'https://your-api-id.execute-api.ap-northeast-2.amazonaws.com/ingest'; // AWS API Gateway 엔드포인트
 
     /**
      * SDK의 핵심 기능을 담당하는 AdScouter 클래스
