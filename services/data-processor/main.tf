@@ -28,6 +28,10 @@ resource "aws_dynamodb_table" "stats_table" {
     name = "eventId"
     type = "S"
   }
+
+  # DynamoDB 스트림 활성화
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES" # 변경 전후 데이터를 모두 스트림으로 보냅니다.
 }
 
 # --- IAM Role & Policy for Processor Lambda ---
@@ -129,4 +133,9 @@ resource "aws_lambda_event_source_mapping" "kinesis_mapping" {
 
 output "dynamodb_table_name" {
   value = aws_dynamodb_table.stats_table.name
+}
+
+output "dynamodb_stream_arn" {
+  description = "The ARN of the DynamoDB stream."
+  value       = aws_dynamodb_table.stats_table.stream_arn
 }
