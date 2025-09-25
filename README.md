@@ -15,6 +15,11 @@ ad-scouter-ai/
 │       └── webpack.config.js # 빌드 설정
 ├── services/
 │   └── api-gateway/         # 데이터 수집 API 서버
+│       ├── src/
+│       │   └── ingest.py    # Lambda 함수 코드
+│       ├── main.tf          # Terraform 인프라 설정
+│       ├── variables.tf     # Terraform 변수
+│       └── README.md        # API 서비스 문서
 ├── docker-compose.yml       # 로컬 개발 환경 설정
 ├── package.json             # 루트 패키지 설정
 └── .gitignore              # Git 제외 파일 목록
@@ -83,6 +88,15 @@ npm run build
 
 빌드된 파일은 `packages/sdk/dist/ad-scouter-sdk.js`에 생성됩니다.
 
+### API Gateway 배포 (AWS)
+
+```bash
+cd services/api-gateway
+terraform init
+terraform plan
+terraform apply
+```
+
 ### Docker를 이용한 로컬 테스트
 
 ```bash
@@ -91,6 +105,20 @@ docker-compose up --build
 
 - API Gateway: http://localhost:3000
 - SDK 테스트 서버: http://localhost:8080
+
+## 현재 구현 상태
+
+### ✅ 완료된 기능
+- [x] 웹용 분석 SDK 기본 구조 (v0.1)
+- [x] AWS Lambda 데이터 수집 API
+- [x] Terraform 인프라 코드
+- [x] CORS 지원 및 보안 검증
+- [x] Git 버전 관리 및 GitHub 연동
+
+### 🚧 진행 중인 작업
+- [ ] API 키 관리 시스템
+- [ ] Kinesis Stream 데이터 파이프라인
+- [ ] 실시간 모니터링 대시보드
 
 ## 라이선스
 
@@ -102,7 +130,7 @@ MIT License
 
 ## 다음 단계
 
-- [ ] API Gateway 서버 구현
+- [ ] API Gateway 서버 배포 및 테스트
 - [ ] SDK 빌드 최적화
 - [ ] 테스트 코드 작성
 - [ ] CI/CD 파이프라인 구축
