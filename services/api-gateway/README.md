@@ -87,9 +87,29 @@ const response = await fetch('https://your-api-id.execute-api.ap-northeast-2.ama
 - API 키 검증 로직을 실제 데이터베이스와 연동하여 강화해야 합니다.
 - Rate limiting을 추가하여 DDoS 공격을 방지해야 합니다.
 
+## 데이터 파이프라인
+
+### 현재 아키텍처
+
+```
+웹사이트 → SDK → API Gateway → Lambda → Kinesis Stream
+```
+
+1. **웹사이트**: 사용자 상호작용 데이터 생성
+2. **SDK**: 데이터를 API Gateway로 전송
+3. **API Gateway**: HTTP 요청을 Lambda로 라우팅
+4. **Lambda**: 데이터 검증 후 Kinesis로 전송
+5. **Kinesis Stream**: 실시간 데이터 스트림 저장
+
+### Kinesis Stream 설정
+
+- **스트림 이름**: `ad-scouter-ingest-stream`
+- **샤드 수**: 1개 (초기 설정, 트래픽에 따라 조정 가능)
+- **파티션 키**: API Key (동일 고객사 데이터는 동일 샤드로 분산)
+
 ## 다음 단계
 
-- [ ] API 키 관리 시스템 구축
-- [ ] Kinesis Stream 연동
+- [x] Kinesis Stream 연동 완료
+- [ ] 데이터 비식별화 처리 Lambda 구축
 - [ ] CloudWatch 모니터링 설정
 - [ ] Rate limiting 구현

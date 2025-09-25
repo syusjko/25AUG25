@@ -55,6 +55,13 @@ resource "aws_lambda_function" "ingest_lambda" {
 
   # 15분 타임아웃
   timeout = 900
+
+  # 환경 변수 설정
+  environment {
+    variables = {
+      KINESIS_STREAM_NAME = aws_kinesis_stream.data_stream.name
+    }
+  }
 }
 
 # --- API Gateway (HTTP API) ---
@@ -107,4 +114,45 @@ resource "aws_lambda_permission" "api_gw_permission" {
 output "api_endpoint_url" {
   description = "The invocation URL for the API Gateway."
   value       = "${aws_apigatewayv2_api.http_api.api_endpoint}/ingest"
+}
+
+# --- Kinesis Data Stream ---
+# 수집된 이벤트를 실시간으로 처리하기 위한 데이터 스트림을 생성합니다.
+resource "aws_kinesis_stream" "data_stream" {
+  name        = "ad-scouter-ingest-stream"
+  shard_count = 1 # 초기에는 1개의 샤드로 시작, 트래픽에 따라 조정 가능
+}
+
+# --- IAM Policy for Kinesis ---
+# Lambda 함수가 Kinesis 스트림에 데이터를 쓸(PutRecord) 수 있도록 하는 정책을 정의합니다.
+resource "aws_iam_policy" "lambda_kinesis_policy" {
+  name        = "ad-scouter-lambda-kinesis-write-policy"
+  description = "Allows Lambda function to write to the Kinesis data stream"
+
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = [
+      {
+        Action   = [
+          "kinesis:PutRecord",
+          "kinesis:PutRecords"
+        ],
+        Effect   = "Allow",
+        Resource = aws_kinesis_stream.data_stream.arn
+      }
+    ]
+  })
+}
+
+# 생성한 Kinesis 쓰기 정책을 Lambda 실행 역할(Role)에 연결(Attach)합니다.
+resource "aws_iam_role_policy_attachment" "lambda_kinesis_attachment" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_kinesis_policy.arn
+}
+
+# --- 추가 출력 ---
+# 생성된 Kinesis 스트림의 이름을 출력합니다.
+output "kinesis_stream_name" {
+  description = "The name of the Kinesis data stream."
+  value       = aws_kinesis_stream.data_stream.name
 }
