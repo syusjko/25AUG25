@@ -2,10 +2,14 @@ import json
 import os
 import boto3 # AWS SDK for Python
 
+# 로컬 테스트 환경을 위한 엔드포인트 설정
+# LOCALSTACK_ENDPOINT_URL 환경 변수가 있으면 해당 URL을 사용
+endpoint_url = os.environ.get('LOCALSTACK_ENDPOINT_URL')
+
 # Kinesis 클라이언트 초기화
-kinesis_client = boto3.client('kinesis')
+kinesis_client = boto3.client('kinesis', endpoint_url=endpoint_url)
 # 환경 변수에서 스트림 이름을 가져옵니다. Terraform에서 설정할 예정입니다.
-STREAM_NAME = os.environ.get('KINESIS_STREAM_NAME')
+STREAM_NAME = os.environ.get('KINESIS_STREAM_NAME', 'ad-scouter-ingest-stream')
 
 def handler(event, context):
     """

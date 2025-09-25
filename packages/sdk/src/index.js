@@ -9,7 +9,8 @@
         return;
     }
 
-    const AD_SCOUTER_API_ENDPOINT = 'https://your-api-id.execute-api.ap-northeast-2.amazonaws.com/ingest'; // AWS API Gateway 엔드포인트
+    // 로컬 테스트 환경에서는 Mock API 서버 사용
+    const AD_SCOUTER_API_ENDPOINT = window.AD_SCOUTER_API_ENDPOINT || 'http://localhost:8080/ingest';
 
     /**
      * SDK의 핵심 기능을 담당하는 AdScouter 클래스

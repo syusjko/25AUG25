@@ -1,35 +1,39 @@
 version: '3.8'
 
 services:
-  # API Gateway 서비스 (로컬 개발용)
-  api-gateway:
-    build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+  localstack:
+    container_name: "ad-scouter-localstack"
+    image: localstack/localstack:latest
     ports:
-      - "3000:3000"
+      - "127.0.0.1:4566:4566"
     environment:
-      - NODE_ENV=development
-      - PORT=3000
+      - DEBUG=1
+      - SERVICES=kinesis,dynamodb,lambda,s3,ses,apigateway
+      - EDGE_PORT=4566
+      - ACTIVATE_PRO=0
     volumes:
-      - ./services/api-gateway:/app
-      - /app/node_modules
+      - "${LOCALSTACK_VOLUME_DIR:-./.localstack}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - ad-scouter-network
 
-  # SDK 개발 서버 (빌드된 SDK 테스트용)
-  sdk-dev-server:
-    image: nginx:alpine
+  postgres:
+    container_name: "ad-scouter-postgres"
+    image: pgvector/pgvector:pg15
     ports:
-      - "8080:80"
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admaster
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=adscouterdb
     volumes:
-      - ./packages/sdk/dist:/usr/share/nginx/html
-      - ./docker/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - api-gateway
+      - pg_data:/var/lib/postgresql/data
     networks:
       - ad-scouter-network
 
 networks:
   ad-scouter-network:
     driver: bridge
+
+volumes:
+  pg_data:

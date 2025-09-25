@@ -5,9 +5,12 @@ import boto3
 import uuid
 import google.generativeai as genai
 
+# 로컬 테스트 환경을 위한 엔드포인트 설정
+endpoint_url = os.environ.get('LOCALSTACK_ENDPOINT_URL')
+
 # boto3 클라이언트 및 환경 변수 초기화
-dynamodb = boto3.resource('dynamodb')
-STATS_TABLE_NAME = os.environ.get('STATS_TABLE_NAME')
+dynamodb = boto3.resource('dynamodb', endpoint_url=endpoint_url)
+STATS_TABLE_NAME = os.environ.get('STATS_TABLE_NAME', 'ad-scouter-stats')
 table = dynamodb.Table(STATS_TABLE_NAME)
 
 # Gemini API 키 설정

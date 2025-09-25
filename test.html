@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad-Scouter AI - 로컬 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-section h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .info {
+            color: #3498db;
+            font-weight: bold;
+        }
+        #log {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Ad-Scouter AI 로컬 테스트</h1>
+        
+        <div class="test-section">
+            <h3>📡 SDK 초기화 테스트</h3>
+            <p>SDK가 정상적으로 로드되고 초기화되는지 확인합니다.</p>
+            <button onclick="testSDKInit()">SDK 초기화 테스트</button>
+            <div id="sdk-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📤 이벤트 전송 테스트</h3>
+            <p>사용자 질문을 시뮬레이션하여 SDK를 통해 서버로 전송합니다.</p>
+            <input type="text" id="question-input" placeholder="질문을 입력하세요 (예: 마이크로소프트 AI 가격은?)" value="마이크로소프트의 새로운 AI 기능 가격은 얼마인가요?">
+            <button onclick="testEventTracking()">이벤트 전송 테스트</button>
+            <div id="event-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 광고 생성 테스트</h3>
+            <p>사용자 질문에 대한 맞춤형 광고를 생성합니다.</p>
+            <input type="text" id="ad-query-input" placeholder="광고 생성용 질문" value="구글의 AI 서비스는 어떻게 사용하나요?">
+            <button onclick="testAdGeneration()">광고 생성 테스트</button>
+            <div id="ad-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 통계 조회 테스트</h3>
+            <p>처리된 이벤트 통계를 조회합니다.</p>
+            <button onclick="testStats()">통계 조회</button>
+            <div id="stats-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 실시간 로그</h3>
+            <div id="log"></div>
+            <button onclick="clearLog()">로그 지우기</button>
+        </div>
+    </div>
+
+    <!-- SDK 로드 -->
+    <script>
+        // SDK 설정
+        window.AD_SCOUTER_API_KEY = 'test-customer-001';
+        window.AD_SCOUTER_API_ENDPOINT = 'http://localhost:8080/ingest';
+    </script>
+    <script src="../packages/sdk/dist/ad-scouter-sdk.js"></script>
+
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logMessage;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(message);
+        }
+        
+        function clearLog() {
+            logElement.textContent = '';
+        }
+        
+        function testSDKInit() {
+            const statusDiv = document.getElementById('sdk-status');
+            
+            try {
+                if (window.adScouter) {
+                    log('✅ SDK가 정상적으로 로드되었습니다.', 'success');
+                    statusDiv.innerHTML = '<span class="success">✅ SDK 초기화 성공</span>';
+                    
+                    // SDK 초기화
+                    window.adScouter.init({
+                        debug: true
+                    });
+                    log('✅ SDK가 성공적으로 초기화되었습니다.', 'success');
+                } else {
+                    throw new Error('SDK가 로드되지 않았습니다.');
+                }
+            } catch (error) {
+                log(`❌ SDK 초기화 실패: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ SDK 초기화 실패: ${error.message}</span>`;
+            }
+        }
+        
+        function testEventTracking() {
+            const statusDiv = document.getElementById('event-status');
+            const question = document.getElementById('question-input').value;
+            
+            if (!question.trim()) {
+                log('⚠️ 질문을 입력해주세요.', 'error');
+                statusDiv.innerHTML = '<span class="error">❌ 질문을 입력해주세요.</span>';
+                return;
+            }
+            
+            try {
+                log(`📤 이벤트 전송 시작: "${question}"`, 'info');
+                
+                window.adScouter.track('question_asked', {
+                    question: question,
+                    category: 'ai_inquiry',
+                    user_type: 'test_user'
+                });
+                
+                log('✅ 이벤트가 성공적으로 전송되었습니다.', 'success');
+                statusDiv.innerHTML = '<span class="success">✅ 이벤트 전송 성공</span>';
+                
+            } catch (error) {
+                log(`❌ 이벤트 전송 실패: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ 이벤트 전송 실패: ${error.message}</span>`;
+            }
+        }
+        
+        async function testAdGeneration() {
+            const statusDiv = document.getElementById('ad-status');
+            const query = document.getElementById('ad-query-input').value;
+            
+            if (!query.trim()) {
+                log('⚠️ 광고 생성용 질문을 입력해주세요.', 'error');
+                statusDiv.innerHTML = '<span class="error">❌ 질문을 입력해주세요.</span>';
+                return;
+            }
+            
+            try {
+                log(`🎯 광고 생성 요청: "${query}"`, 'info');
+                
+                const response = await fetch('http://localhost:8080/ads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                if (response.ok) {
+                    const adData = await response.json();
+                    log(`✅ 광고 생성 성공: ${adData.ad_content}`, 'success');
+                    statusDiv.innerHTML = `
+                        <span class="success">✅ 광고 생성 성공</span>
+                        <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e8; border-radius: 5px;">
+                            <strong>광고주:</strong> ${adData.advertiser.name}<br>
+                            <strong>광고 내용:</strong> ${adData.ad_content}<br>
+                            <strong>유사도 점수:</strong> ${adData.similarity_score}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                log(`❌ 광고 생성 실패: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ 광고 생성 실패: ${error.message}</span>`;
+            }
+        }
+        
+        async function testStats() {
+            const statusDiv = document.getElementById('stats-status');
+            
+            try {
+                log('📊 통계 조회 요청', 'info');
+                
+                const response = await fetch('http://localhost:8080/stats');
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    log(`✅ 통계 조회 성공: 총 ${stats.total_events}개 이벤트`, 'success');
+                    statusDiv.innerHTML = `
+                        <span class="success">✅ 통계 조회 성공</span>
+                        <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e8; border-radius: 5px;">
+                            <strong>총 이벤트:</strong> ${stats.total_events}개<br>
+                            <strong>처리된 이벤트:</strong> ${stats.processed_events}개<br>
+                            <strong>대기 중인 이벤트:</strong> ${stats.pending_events}개
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                log(`❌ 통계 조회 실패: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ 통계 조회 실패: ${error.message}</span>`;
+            }
+        }
+        
+        // 페이지 로드 시 자동으로 SDK 초기화 테스트
+        window.addEventListener('load', function() {
+            log('🚀 Ad-Scouter AI 로컬 테스트 페이지가 로드되었습니다.', 'info');
+            setTimeout(testSDKInit, 1000);
+        });
+    </script>
+</body>
+</html>
