@@ -1,0 +1,28 @@
+{
+  "name": "@ad-scouter/data-processor",
+  "version": "0.1.0",
+  "description": "Ad-Scouter AI Data Processing Service",
+  "main": "src/processor.py",
+  "scripts": {
+    "deploy": "terraform apply -auto-approve",
+    "destroy": "terraform destroy -auto-approve",
+    "plan": "terraform plan",
+    "init": "terraform init",
+    "validate": "terraform validate",
+    "format": "terraform fmt -recursive"
+  },
+  "devDependencies": {
+    "terraform": "^1.5.0"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "kinesis",
+    "dynamodb",
+    "gemini",
+    "ai",
+    "ad-scouter"
+  ],
+  "author": "Ad-Scouter AI Team",
+  "license": "MIT"
+}

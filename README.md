@@ -14,12 +14,18 @@ ad-scouter-ai/
 │       ├── package.json     # SDK 패키지 설정
 │       └── webpack.config.js # 빌드 설정
 ├── services/
-│   └── api-gateway/         # 데이터 수집 API 서버
+│   ├── api-gateway/         # 데이터 수집 API 서버
+│   │   ├── src/
+│   │   │   └── ingest.py    # Lambda 함수 코드
+│   │   ├── main.tf          # Terraform 인프라 설정
+│   │   ├── variables.tf     # Terraform 변수
+│   │   └── README.md        # API 서비스 문서
+│   └── data-processor/       # 데이터 처리 및 분석 서비스
 │       ├── src/
-│       │   └── ingest.py    # Lambda 함수 코드
-│       ├── main.tf          # Terraform 인프라 설정
+│       │   └── processor.py # Kinesis 데이터 처리 Lambda
+│       ├── main.tf          # DynamoDB 및 Lambda 설정
 │       ├── variables.tf     # Terraform 변수
-│       └── README.md        # API 서비스 문서
+│       └── README.md        # 데이터 처리 서비스 문서
 ├── docker-compose.yml       # 로컬 개발 환경 설정
 ├── package.json             # 루트 패키지 설정
 └── .gitignore              # Git 제외 파일 목록
@@ -114,10 +120,14 @@ docker-compose up --build
 - [x] Terraform 인프라 코드
 - [x] CORS 지원 및 보안 검증
 - [x] Git 버전 관리 및 GitHub 연동
+- [x] Amazon Kinesis 데이터 스트림 연동
+- [x] 실시간 데이터 파이프라인 구축
+- [x] 데이터 처리 및 분석 엔진 (DynamoDB 연동)
+- [x] Gemini API 의도 분석 시스템 (Mock 구현)
 
 ### 🚧 진행 중인 작업
-- [ ] API 키 관리 시스템
-- [ ] Kinesis Stream 데이터 파이프라인
+- [ ] Gemini API 실제 연동
+- [ ] 데이터 비식별화 처리 (Microsoft Presidio)
 - [ ] 실시간 모니터링 대시보드
 
 ## 라이선스
